@@ -22,30 +22,34 @@
             max-width: 400px;
             margin: 0 auto;
             padding: 0 20px 5mm; /* cách đáy 5mm */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
         }
 
         .display {
-            font-size: 14vw; /* lớn hơn */
+            font-size: 28vw; /* to gấp đôi */
             text-align: right;
-            padding: 10px;
-            min-height: 100px;
+            min-height: 120px;
             background-color: black;
             color: white;
             overflow: hidden;
             word-wrap: break-word;
+            margin-bottom: 4mm; /* cách hàng nút trên cùng khoảng 4mm */
+            font-weight: 200; /* mỏng hơn */
+            letter-spacing: 0.1em; /* rộng hơn 10% */
         }
 
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-            margin-top: 20px;
         }
 
         button {
             font-size: 6vw;
             border: none;
-            aspect-ratio: 1 / 1; /* hình tròn chuẩn */
+            aspect-ratio: 1 / 1;
             border-radius: 50%;
             background-color: #333;
             color: white;
@@ -82,7 +86,7 @@
 
         @media (min-width: 400px) {
             .display {
-                font-size: 60px;
+                font-size: 120px;
             }
             button {
                 font-size: 30px;
@@ -159,7 +163,6 @@
                 display.innerText = "0";
                 updateClearButton("AC");
                 if (currentOpBtn) currentOpBtn.classList.remove("active");
-                // giữ lại lastOperator và lastOperand để dùng lại khi nhấn =
             } else {
                 allClear();
             }
