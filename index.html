@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>iOS-style Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .calculator {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .display {
+            font-size: 10vw;
+            text-align: right;
+            padding: 10px;
+            min-height: 80px;
+            background-color: black;
+            color: white;
+            overflow: hidden;
+            word-wrap: break-word;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            font-size: 6vw;
+            border: none;
+            border-radius: 50%;
+            padding: 5vw;
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        button.zero {
+            grid-column: span 2;
+            border-radius: 50px;
+        }
+
+        button.operator {
+            background-color: orange;
+        }
+
+        button.operator.active {
+            background-color: white;
+            color: orange;
+        }
+
+        button:nth-child(-n+3) {
+            background-color: gray;
+            color: black;
+        }
+
+        button:active {
+            opacity: 0.7;
+        }
+
+        @media (min-width: 400px) {
+            .display {
+                font-size: 40px;
+            }
+            button {
+                font-size: 30px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button id="clear-btn" onclick="handleClear()">AC</button>
+            <button onclick="toggleSign()">±</button>
+            <button onclick="percent()">%</button>
+            <button id="op-div" class="operator" onclick="pressOp('/', this)">÷</button>
+
+            <button onclick="press('7')">7</button>
+            <button onclick="press('8')">8</button>
+            <button onclick="press('9')">9</button>
+            <button id="op-mul" class="operator" onclick="pressOp('*', this)">×</button>
+
+            <button onclick="press('4')">4</button>
+            <button onclick="press('5')">5</button>
+            <button onclick="press('6')">6</button>
+            <button id="op-sub" class="operator" onclick="pressOp('-', this)">−</button>
+
+            <button onclick="press('1')">1</button>
+            <button onclick="press('2')">2</button>
+            <button onclick="press('3')">3</button>
+            <button id="op-add" class="operator" onclick="pressOp('+', this)">+</button>
+
+            <button class="zero" onclick="press('0')">0</button>
+            <button onclick="press('.')">.</button>
+            <button onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById("display");
+        let clearBtn = document.getElementById("clear-btn");
+        let input = "";
+        let lastResult = null;
+        let repeatValue = null;
+        let clearState = "AC";
+        let currentOpBtn = null;
+        let lastOperator = null;
+        let lastOperand = null;
+        let justPressedOp = false;
+        let lastInput = "";
+
+        function press(char) {
+            if (justPressedOp) {
+                display.innerText = char;
+                justPressedOp = false;
+                if (currentOpBtn) currentOpBtn.classList.remove("active");
+            } else {
+                if (display.innerText === "0" || /[+\-*/=]/.test(display.innerText)) {
+                    display.innerText = char;
+                } else {
+                    display.innerText += char;
+                }
+            }
+            input += char;
+            updateClearButton("C");
+        }
+
+        function updateClearButton(state) {
+            clearState = state;
+            clearBtn.innerText = state;
+        }
+
+        function handleClear() {
+            if (clearState === "C") {
+                input = "";
+                display.innerText = "0";
+                updateClearButton("AC");
+                if (currentOpBtn) currentOpBtn.classList.remove("active");
+                // Giữ lại lastOperator và lastOperand để dùng lại khi nhấn =
+            } else {
+                allClear();
+            }
+        }
+
+        function allClear() {
+            input = "";
+            lastResult = null;
+            repeatValue = null;
+            lastOperator = null;
+            lastOperand = null;
+            display.innerText = "0";
+            updateClearButton("AC");
+            if (currentOpBtn) currentOpBtn.classList.remove("active");
+        }
+
+        function toggleSign() {
+            if (display.innerText !== "0") {
+                if (display.innerText.startsWith("-")) {
+                    display.innerText = display.innerText.slice(1);
+                } else {
+                    display.innerText = "-" + display.innerText;
+                }
+            }
+        }
+
+        function percent() {
+            try {
+                let value = parseFloat(display.innerText);
+                value = value / 100;
+                display.innerText = value;
+                input = value.toString();
+            } catch {}
+        }
+
+        function pressOp(op, btn) {
+            if (/[+\-*/]$/.test(input)) {
+                input = input.slice(0, -1) + op;
+            } else {
+                input += op;
+            }
+            lastOperator = op;
+            justPressedOp = true;
+            updateClearButton("C");
+
+            if (currentOpBtn) currentOpBtn.classList.remove("active");
+            currentOpBtn = btn;
+            currentOpBtn.classList.add("active");
+        }
+
+        function calculate() {
+            try {
+                if (!input && lastResult !== null && lastOperator && lastOperand !== null) {
+                    input = lastResult + lastOperator + lastOperand;
+                    display.innerText = lastOperand;
+                    return;
+                }
+
+                let result = Function(`"use strict"; return (${input})`)();
+                if (isNaN(result)) throw new Error("Invalid");
+                let match = input.match(/([+\-*/])([^+\-*/]+)$/);
+                if (match) {
+                    lastOperator = match[1];
+                    lastOperand = match[2];
+                }
+                lastResult = result;
+                display.innerText = result;
+                input = result.toString();
+                updateClearButton("C");
+                if (currentOpBtn) currentOpBtn.classList.remove("active");
+            } catch {
+                display.innerText = "Error";
+                input = "";
+                if (currentOpBtn) currentOpBtn.classList.remove("active");
+            }
+        }
+    </script>
+</body>
+</html>
