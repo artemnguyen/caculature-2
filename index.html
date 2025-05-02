@@ -9,24 +9,26 @@
             background-color: black;
             color: white;
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
         }
 
         .calculator {
             width: 100%;
             max-width: 400px;
-            padding: 20px;
+            margin: 0 auto;
+            padding: 0 20px 5mm; /* cách đáy 5mm */
         }
 
         .display {
-            font-size: 10vw;
+            font-size: 14vw; /* lớn hơn */
             text-align: right;
             padding: 10px;
-            min-height: 80px;
+            min-height: 100px;
             background-color: black;
             color: white;
             overflow: hidden;
@@ -37,22 +39,27 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
+            margin-top: 20px;
         }
 
         button {
             font-size: 6vw;
             border: none;
+            aspect-ratio: 1 / 1; /* hình tròn chuẩn */
             border-radius: 50%;
-            padding: 5vw;
             background-color: #333;
             color: white;
             cursor: pointer;
             transition: background-color 0.2s, color 0.2s;
+            width: 100%;
         }
 
         button.zero {
             grid-column: span 2;
+            aspect-ratio: auto;
             border-radius: 50px;
+            text-align: left;
+            padding-left: 20px;
         }
 
         button.operator {
@@ -75,11 +82,10 @@
 
         @media (min-width: 400px) {
             .display {
-                font-size: 40px;
+                font-size: 60px;
             }
             button {
                 font-size: 30px;
-                padding: 20px;
             }
         }
     </style>
@@ -150,11 +156,10 @@
 
         function handleClear() {
             if (clearState === "C") {
-                input = "";
                 display.innerText = "0";
                 updateClearButton("AC");
                 if (currentOpBtn) currentOpBtn.classList.remove("active");
-                // Giữ lại lastOperator và lastOperand để dùng lại khi nhấn =
+                // giữ lại lastOperator và lastOperand để dùng lại khi nhấn =
             } else {
                 allClear();
             }
@@ -213,7 +218,7 @@
                     return;
                 }
 
-                let result = Function(`"use strict"; return (${input})`)();
+                let result = Function("\"use strict\"; return (" + input + ")")();
                 if (isNaN(result)) throw new Error("Invalid");
                 let match = input.match(/([+\-*/])([^+\-*/]+)$/);
                 if (match) {
